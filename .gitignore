@@ -1,0 +1,38 @@
+# Environment files (contain API keys - never commit)
+.env
+.env.local
+.env.production
+.env.staging
+**/.env*
+
+# Node modules
+**/node_modules/
+
+# Next.js build output
+frontend/.next/
+frontend/out/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Docker
+.dockerignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Google Cloud
+ai-coe-454404-4ce749c651f9.json
+
+# Logs
+*.log
+logs/
