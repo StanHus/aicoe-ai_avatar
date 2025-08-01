@@ -99,9 +99,9 @@ function SimpleVoiceAssistant(props: { onConnectButtonClicked: () => void }) {
             className="flex flex-col items-center gap-4 h-full"
           >
             <AgentVisualizer />
-            <div className="flex-1 w-full">
+            {/* <div className="flex-1 w-full">
               <TranscriptionView />
-            </div>
+            </div> */}
             <div className="w-full">
               <ControlBar onConnectButtonClicked={props.onConnectButtonClicked} />
             </div>

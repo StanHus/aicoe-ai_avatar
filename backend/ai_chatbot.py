@@ -36,14 +36,15 @@ logger.setLevel(logging.INFO)
 # TRILOGY AI CHATBOT IMPLEMENTATION
 # ==============================================================================
 
+
 class TrilogyAIChatbot:
     """
     Full-featured Trilogy AI expert with complete knowledge processing.
-    
+
     This preserves all functionality from the original agent_worker.py system.
     Replace this entire class with your own AI system.
     """
-    
+
     def __init__(self):
         self.knowledge_base: List[Dict[str, Any]] = []
         self.knowledge_map: Dict[str, Any] = {}
@@ -51,31 +52,34 @@ class TrilogyAIChatbot:
         self.realtime_instructions = ""
         # Pre-compiled patterns for performance (from original system)
         self.tool_patterns = CONFIG.TOOL_PATTERNS
-        self.model_patterns = CONFIG.MODEL_PATTERNS  
+        self.model_patterns = CONFIG.MODEL_PATTERNS
         self.method_patterns = CONFIG.METHODOLOGY_PATTERNS
-        
+
     async def initialize(self) -> str:
         """Initialize with full knowledge processing from original system"""
         logger.info(f"Loading {CONFIG.EXPERT_DOMAIN} knowledge base...")
-        
+
         try:
             # Fetch comprehensive knowledge content (same as original)
             self.knowledge_base = await self._fetch_comprehensive_content()
-            
+
             if self.knowledge_base:
-                logger.info(f"Knowledge base created with {len(self.knowledge_base)} articles")
-                
+                logger.info(
+                    f"Knowledge base created with {len(self.knowledge_base)} articles")
+
                 # Build comprehensive knowledge map (same as original)
-                self.knowledge_map = self._create_detailed_knowledge_map(self.knowledge_base)
-                logger.info(f"Knowledge map created with {len(self.knowledge_map['key_findings'])} detailed analyses")
-                
+                self.knowledge_map = self._create_detailed_knowledge_map(
+                    self.knowledge_base)
+                logger.info(
+                    f"Knowledge map created with {len(self.knowledge_map['key_findings'])} detailed analyses")
+
                 # Generate optimized instructions (same as original)
                 self.realtime_instructions = self._create_optimized_instructions(
                     self.knowledge_base, self.knowledge_map
                 )
-                
+
                 self.is_initialized = True
-                
+
                 # Use CONFIG loading message (preserves original functionality)
                 latest_title = self.knowledge_map['latest_article']['title'][:40]
                 ready_message = CONFIG.LOADING_MESSAGES['ready'].format(
@@ -84,14 +88,15 @@ class TrilogyAIChatbot:
                 )
                 return ready_message
             else:
-                logger.warning("No articles fetched. Using fallback instructions.")
+                logger.warning(
+                    "No articles fetched. Using fallback instructions.")
                 self.realtime_instructions = CONFIG.FALLBACK_INSTRUCTIONS
                 return CONFIG.LOADING_MESSAGES['unavailable']
-                
+
         except Exception as e:
             logger.error(f"Failed to initialize {CONFIG.EXPERT_DOMAIN}: {e}")
             return CONFIG.LOADING_MESSAGES['unavailable']
-    
+
     async def get_response(self, user_message: str) -> str:
         """
         Generate intelligent responses using our comprehensive knowledge base.
@@ -99,14 +104,14 @@ class TrilogyAIChatbot:
         """
         if not self.is_initialized:
             return "I'm still loading my knowledge base. Please wait a moment."
-        
+
         # Use the sophisticated response generation with all article content
         return self._generate_sophisticated_response(user_message)
-    
+
     def get_full_instructions(self) -> str:
         """Return the full optimized instructions for use by the avatar service"""
         return self.realtime_instructions
-    
+
     def get_voice_settings(self) -> dict:
         """Return voice and avatar settings from CONFIG"""
         return {
@@ -114,17 +119,49 @@ class TrilogyAIChatbot:
             "speed": CONFIG.VOICE_SPEED,
             "avatar_image": CONFIG.AVATAR_IMAGE
         }
-    
+
     def _generate_sophisticated_response(self, user_message: str) -> str:
         """
         Generate sophisticated responses using the detailed knowledge base like agent_worker.py
         This mimics how the original system would process questions with full article context
         """
         user_lower = user_message.lower()
-        
+
+        # Filter out simple acknowledgments and short messages
+        simple_acknowledgments = ['ok', 'okay', 'thanks', 'thank you', 'got it', 'i see',
+                                  'i understand', 'understood', 'sure', 'yes', 'no', 'yeah',
+                                  'alright', 'cool', 'great', 'good', 'nice', 'right', 'uh huh',
+                                  'mhm', 'mmm', 'hmm', 'ah', 'oh', 'wow', 'really', 'interesting']
+
+        # Check if message is too short or just an acknowledgment
+        if len(user_message.strip()) < 10 or user_lower.strip() in simple_acknowledgments:
+            return ""  # Return empty string to not respond
+
+        # Check if the message lacks substance (just greetings or fillers)
+        greeting_patterns = ['hi', 'hello', 'hey', 'how are you', 'what\'s up', 'good morning',
+                             'good afternoon', 'good evening', 'greetings', 'howdy', 'sup']
+        if any(user_lower.strip() == pattern for pattern in greeting_patterns):
+            return ""  # Don't respond to simple greetings
+
+        # Check if message has enough content words (not just filler words)
+        filler_words = ['the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+                        'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should',
+                        'could', 'may', 'might', 'must', 'shall', 'can', 'to', 'of', 'in',
+                        'for', 'on', 'with', 'at', 'by', 'from', 'up', 'out', 'if', 'then',
+                        'than', 'but', 'or', 'as', 'so', 'it', 'this', 'that', 'these', 'those']
+
+        # Split message into words and check content
+        words = user_lower.split()
+        content_words = [
+            w for w in words if w not in filler_words and len(w) > 2]
+
+        # If less than 3 meaningful content words, don't respond
+        if len(content_words) < 3:
+            return ""
+
         # AI Center of Excellence / CoE queries - TRILOGY-SPECIFIC content first
         if any(term in user_lower for term in ['center of excellence', 'coe', 'ai center', 'excellence', 'trilogy']):
-            
+
             # PRIORITY 1: Look for Trilogy-specific CoE content
             trilogy_coe_article = None
             for i, article in enumerate(self.knowledge_base, 1):
@@ -137,20 +174,22 @@ class TrilogyAIChatbot:
                         'content': article['full_content'][:800]
                     }
                     break
-            
+
             if trilogy_coe_article:
                 return f"Here's Trilogy's specific Center of Excellence approach from our research:\n\n" + \
-                       f"Article #{trilogy_coe_article['number']}: '{trilogy_coe_article['title']}' by {trilogy_coe_article['author']}\n\n" + \
-                       f"Summary: {trilogy_coe_article['summary']}\n\n" + \
-                       f"Key details from the research:\n{trilogy_coe_article['content']}...\n\n" + \
-                       f"This article provides specific insights into how Trilogy's AI Center of Excellence differs from other companies through data-driven approaches and measurable impact metrics."
-            
+                    f"Article #{trilogy_coe_article['number']}: '{trilogy_coe_article['title']}' by {trilogy_coe_article['author']}\n\n" + \
+                    f"Summary: {trilogy_coe_article['summary']}\n\n" + \
+                    f"Key details from the research:\n{trilogy_coe_article['content']}...\n\n" + \
+                    f"This article provides specific insights into how Trilogy's AI Center of Excellence differs from other companies through data-driven approaches and measurable impact metrics."
+
             # PRIORITY 2: Search for other CoE-related content in our research
             relevant_findings = []
             for title, findings in self.knowledge_map.get('key_findings', {}).items():
-                content_check = (title + ' ' + findings['main_focus'] + ' ' + findings['full_context']).lower()
+                content_check = (
+                    title + ' ' + findings['main_focus'] + ' ' + findings['full_context']).lower()
                 if any(term in content_check for term in ['framework', 'governance', 'methodology', 'validation', 'enterprise', 'center', 'excellence', 'impact', 'adoption']):
-                    article_num = next((i for i, article in enumerate(self.knowledge_base, 1) if article['title'] == title), 0)
+                    article_num = next((i for i, article in enumerate(
+                        self.knowledge_base, 1) if article['title'] == title), 0)
                     # Check if this is a Trilogy article
                     is_trilogy = 'trilogy' in content_check
                     relevant_findings.append({
@@ -162,10 +201,11 @@ class TrilogyAIChatbot:
                         'methodologies': findings['methodologies'],
                         'is_trilogy': is_trilogy
                     })
-            
+
             # Sort Trilogy articles first
-            relevant_findings.sort(key=lambda x: (not x['is_trilogy'], x['number']))
-            
+            relevant_findings.sort(key=lambda x: (
+                not x['is_trilogy'], x['number']))
+
             if relevant_findings:
                 response = f"Based on our {CONFIG.EXPERT_DOMAIN} research on Centers of Excellence:\n\n"
                 for finding in relevant_findings[:3]:  # Top 3 most relevant
@@ -176,19 +216,20 @@ class TrilogyAIChatbot:
                     if finding['methodologies']:
                         response += f"Methodologies: {', '.join(finding['methodologies'])}\n"
                     response += "\n"
-                
+
                 return response + f"We have {len(relevant_findings)} articles covering AI governance and impact measurement. The Trilogy-specific content shows how we differ from other companies through empirical validation and continuous improvement."
             else:
                 return f"I don't see AI Center of Excellence specifically covered in our {len(self.knowledge_base)} {CONFIG.EXPERT_DOMAIN} research articles. Are you asking about something outside our research focus?"
-        
+
         # Technology/tools queries - detailed tool analysis with specific examples
         if any(term in user_lower for term in ['technology', 'tool', 'interesting', 'covered', 'model', 'platform']):
             interesting_techs = []
             tools_mentioned = self.knowledge_map.get('tools_mentioned', set())
-            
+
             for title, findings in self.knowledge_map.get('key_findings', {}).items():
                 if findings['tools_used'] or findings['models_discussed']:
-                    article_num = next((i for i, article in enumerate(self.knowledge_base, 1) if article['title'] == title), 0)
+                    article_num = next((i for i, article in enumerate(
+                        self.knowledge_base, 1) if article['title'] == title), 0)
                     interesting_techs.append({
                         'number': article_num,
                         'title': title,
@@ -197,7 +238,7 @@ class TrilogyAIChatbot:
                         'models': findings['models_discussed'],
                         'context': findings['full_context'][:250]
                     })
-            
+
             if interesting_techs:
                 response = f"Most interesting technologies covered in our {CONFIG.EXPERT_DOMAIN} research:\n\n"
                 for tech in interesting_techs[:3]:  # Top 3 most interesting
@@ -207,24 +248,26 @@ class TrilogyAIChatbot:
                     if tech['models']:
                         response += f"Models analyzed: {', '.join(tech['models'])}\n"
                     response += f"Context: {tech['context']}\n\n"
-                
+
                 return response + f"Overall technologies: {', '.join(sorted(tools_mentioned))}\n\nWhich specific technology or implementation would you like me to explain in detail?"
-            
+
         # Specific author queries - detailed author expertise
         author_mapping = {
             'stanislav': 'Stanislav Huseletov',
-            'leonardo': 'Leonardo Gonzalez', 
+            'leonardo': 'Leonardo Gonzalez',
             'david': 'David Proctor',
             'praveen': 'Praveen Koka'
         }
-        
+
         for name_key, full_name in author_mapping.items():
             if name_key in user_lower or full_name.lower() in user_lower:
-                author_works = self.knowledge_map.get('by_author', {}).get(full_name, [])
+                author_works = self.knowledge_map.get(
+                    'by_author', {}).get(full_name, [])
                 if author_works:
                     response = f"{full_name}'s research expertise in our {CONFIG.EXPERT_DOMAIN} collection:\n\n"
                     for i, work in enumerate(author_works, 1):
-                        article_num = next((j for j, article in enumerate(self.knowledge_base, 1) if article['title'] == work['title']), 0)
+                        article_num = next((j for j, article in enumerate(
+                            self.knowledge_base, 1) if article['title'] == work['title']), 0)
                         response += f"#{article_num}: '{work['title']}'\n"
                         response += f"Summary: {work['summary']}\n"
                         concepts = work['key_concepts']
@@ -233,14 +276,15 @@ class TrilogyAIChatbot:
                         if concepts['methodologies']:
                             response += f"Methods: {', '.join(concepts['methodologies'])}\n"
                         response += "\n"
-                    
+
                     return response + f"{full_name} has {len(author_works)} articles in our research. Which specific work interests you most?"
-        
+
         # Latest/recent queries with detailed context
         if any(word in user_lower for word in ['latest', 'recent', 'new']):
             latest = self.knowledge_map.get('latest_article', {})
             if latest:
-                findings = self.knowledge_map.get('key_findings', {}).get(latest['title'], {})
+                findings = self.knowledge_map.get(
+                    'key_findings', {}).get(latest['title'], {})
                 response = f"Our latest research: Article #1 '{latest.get('title')}' by {latest.get('author')}'\n\n"
                 response += f"Published: {latest.get('published', '')[:11]}\n"
                 response += f"Focus: {findings.get('main_focus', latest.get('summary', ''))}\n\n"
@@ -250,17 +294,20 @@ class TrilogyAIChatbot:
                     response += f"Models: {', '.join(findings['models_discussed'])}\n"
                 response += f"\nKey insights: {findings.get('full_context', latest.get('full_content', ''))[:400]}..."
                 return response
-        
+
         # Broad intelligent search across all content
         search_terms = [word for word in user_lower.split() if len(word) > 3]
         relevant_findings = []
-        
+
         for title, findings in self.knowledge_map.get('key_findings', {}).items():
-            search_text = (title + ' ' + findings['main_focus'] + ' ' + findings['full_context']).lower()
-            relevance_score = sum(1 for term in search_terms if term in search_text)
-            
+            search_text = (
+                title + ' ' + findings['main_focus'] + ' ' + findings['full_context']).lower()
+            relevance_score = sum(
+                1 for term in search_terms if term in search_text)
+
             if relevance_score > 0:
-                article_num = next((i for i, article in enumerate(self.knowledge_base, 1) if article['title'] == title), 0)
+                article_num = next((i for i, article in enumerate(
+                    self.knowledge_base, 1) if article['title'] == title), 0)
                 relevant_findings.append({
                     'score': relevance_score,
                     'number': article_num,
@@ -269,33 +316,33 @@ class TrilogyAIChatbot:
                     'focus': findings['main_focus'],
                     'context': findings['full_context'][:200]
                 })
-        
+
         # Sort by relevance
         relevant_findings.sort(key=lambda x: x['score'], reverse=True)
-        
+
         if relevant_findings:
             response = f"Found relevant content in our {CONFIG.EXPERT_DOMAIN} research:\n\n"
             for finding in relevant_findings[:3]:  # Top 3 most relevant
                 response += f"Article #{finding['number']}: '{finding['title']}' by {finding['author']}\n"
                 response += f"Relevance: {finding['focus']}\n"
                 response += f"Details: {finding['context']}...\n\n"
-            
+
             return response + "Which article would you like me to analyze in detail?"
-        
+
         # No matches - ask for clarification
         return f"I don't see this topic covered in our {len(self.knowledge_base)} {CONFIG.EXPERT_DOMAIN} research articles. Are you asking about something outside our research scope? Please confirm if you'd like general information instead."
-    
+
     # ==============================================================================
     # TRILOGY AI SPECIFIC KNOWLEDGE LOADING (REPLACE WITH YOUR AI SYSTEM)
     # ==============================================================================
-    
+
     async def _fetch_comprehensive_content(self) -> List[Dict[str, Any]]:
         """Comprehensive knowledge fetching using JSON API to get all 41 articles"""
         # Use JSON API instead of RSS to get all articles
         api_url = "https://trilogyai.substack.com/api/v1/posts?offset=0&limit=50"
-        
+
         logger.info(f"Fetching all articles from JSON API: {api_url}")
-        
+
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(api_url) as response:
@@ -304,27 +351,29 @@ class TrilogyAIChatbot:
                     articles = []
                     for post in json_data:
                         title = post.get('title', 'Unknown Title')
-                        
+
                         # Extract author from publishedBylines
                         author = 'Unknown Author'
                         if 'publishedBylines' in post and post['publishedBylines']:
-                            author = post['publishedBylines'][0].get('name', 'Unknown Author')
-                        
+                            author = post['publishedBylines'][0].get(
+                                'name', 'Unknown Author')
+
                         # Get published date
                         pub_date = post.get('post_date', '')
-                        
+
                         # Get canonical URL
                         link = post.get('canonical_url', '')
-                        
+
                         # Get description and body content
                         description = post.get('description', '')
                         body_html = post.get('body_html', '')
-                        
+
                         # Use body_html as full content, fallback to description
                         full_content_raw = body_html if body_html else description
-                        
+
                         # Clean the HTML content
-                        clean_content = self._clean_html_content(full_content_raw)
+                        clean_content = self._clean_html_content(
+                            full_content_raw)
                         clean_summary = self._clean_html_content(description)
 
                         article = {
@@ -337,9 +386,11 @@ class TrilogyAIChatbot:
                         }
 
                         articles.append(article)
-                        logger.info(f"Processed article {len(articles)}: {article['title'][:50]}...")
+                        logger.info(
+                            f"Processed article {len(articles)}: {article['title'][:50]}...")
 
-                    logger.info(f"Successfully fetched {len(articles)} articles from JSON API")
+                    logger.info(
+                        f"Successfully fetched {len(articles)} articles from JSON API")
                     return articles
 
         except Exception as e:
@@ -347,11 +398,11 @@ class TrilogyAIChatbot:
             # Fallback to RSS feed if JSON API fails
             logger.info("Falling back to RSS feed...")
             return await self._fetch_rss_fallback()
-    
+
     async def _fetch_rss_fallback(self) -> List[Dict[str, Any]]:
         """Fallback RSS feed fetching (limited to ~20 articles)"""
         feed_url = CONFIG.FEED_URL
-        
+
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(feed_url) as response:
@@ -402,13 +453,14 @@ class TrilogyAIChatbot:
 
                         articles.append(article)
 
-                    logger.info(f"RSS fallback fetched {len(articles)} articles")
+                    logger.info(
+                        f"RSS fallback fetched {len(articles)} articles")
                     return articles
 
         except Exception as e:
             logger.error(f"RSS fallback also failed: {e}")
             return []
-    
+
     def _clean_html_content(self, html_content: str) -> str:
         """Clean HTML content and extract plain text (from original system)"""
         if not html_content:
@@ -422,7 +474,7 @@ class TrilogyAIChatbot:
         clean_text = re.sub(r'\s+', ' ', clean_text).strip()
 
         return clean_text
-    
+
     def _extract_key_concepts(self, content: str, title: str) -> Dict[str, List[str]]:
         """Extract key concepts based on configured patterns (from original system)"""
         content_lower = content.lower()
@@ -450,7 +502,7 @@ class TrilogyAIChatbot:
                 concepts['methodologies'].append(method.title())
 
         return concepts
-    
+
     def _create_detailed_knowledge_map(self, articles: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Create comprehensive knowledge map (from original system)"""
         knowledge_map = {
@@ -508,10 +560,10 @@ class TrilogyAIChatbot:
             }
 
         return knowledge_map
-    
+
     def _create_optimized_instructions(self, articles: List[Dict[str, Any]], knowledge_map: Dict[str, Any]) -> str:
         """Create optimized instructions for the agent (from original system)"""
-        
+
         # Handle case where no articles are available
         if not articles:
             return CONFIG.FALLBACK_INSTRUCTIONS
@@ -565,13 +617,21 @@ You are a {CONFIG.EXPERT_DOMAIN} research expert with EXCLUSIVE ACCESS to our pr
         - Use exact content from the key content summaries above - especially Article #14 for Trilogy CoE questions
         - Never say "not available" - all our content is accessible above
         - TRILOGY EXAMPLES: Use Article #14's real data: "73% of employee time spent in AI tools", "53% admit unsure if AI use creates real value", "Internal Survey: Meaningful AI Learning, 2025"
-        - REMINDER: All responses must be in English language only"""
+        - REMINDER: All responses must be in English language only
+        
+        COMPREHENSIVE RESPONSE POLICY:
+        - MINIMUM RESPONSE LENGTH: All responses MUST be at least 3 sentences long with substantive content from our research articles
+        - NO SHORT ACKNOWLEDGMENTS: Never respond with simple phrases like "I understand", "Got it", "Thanks", "Okay", etc.
+        - If user message is too brief or unclear, ask for clarification: "Could you please elaborate on what specific aspect of [topic] you'd like to explore from our research?"
+        - If user just acknowledges your response, DO NOT respond at all - remain silent
+        - Only provide responses that reference specific articles, data points, or research findings from our collection"""
 
         return instructions
 
 # ==============================================================================
 # EXAMPLE: SIMPLE OPENAI CHATBOT (COMMENTED OUT)
 # ==============================================================================
+
 
 """
 Example of how to replace with OpenAI:
@@ -610,7 +670,7 @@ class OpenAIChatbot:
 """
 
 # ==============================================================================
-# EXAMPLE: CLAUDE API CHATBOT (COMMENTED OUT)  
+# EXAMPLE: CLAUDE API CHATBOT (COMMENTED OUT)
 # ==============================================================================
 
 """
