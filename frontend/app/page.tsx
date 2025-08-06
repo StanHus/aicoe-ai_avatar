@@ -52,8 +52,25 @@ export default function Page() {
   return (
     // anchor
     <main data-lk-theme="default" className="h-full grid content-center bg-[var(--lk-bg)]">
+      <header className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/60 to-transparent">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
+          <img src="assets/hedra_logo.svg" alt="Hedra Logo" className="h-10 w-auto" />
+          <a 
+            href="https://trilogyai.substack.com/p/ai-avatar" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="group flex items-center gap-2 bg-white backdrop-blur-sm border border-gray-200 rounded-lg px-4 py-2 hover:bg-gray-100 hover:scale-105 transition-all duration-200"
+          >
+            <span className="text-sm font-medium text-black">
+              Any Chatbot Can Become a Living Expert
+            </span>
+            <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+        </div>
+      </header>
       <div className="w-full flex flex-col items-center mb-8">
-        <img src="assets/hedra_logo.svg" alt="Hedra Logo" className="h-16 w-auto mb-4" />
         <div className="text-center text-sm text-gray-400 max-w-md">
           <p className="mb-1">
             💡 <strong>Voice Commands:</strong>
