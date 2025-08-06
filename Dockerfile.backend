@@ -17,8 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend source code
 COPY backend/ .
 
-# Copy environment file
-COPY backend/.env.local .env.local
+# Environment variables will be provided by Render
 
 # Expose port
 EXPOSE 8080

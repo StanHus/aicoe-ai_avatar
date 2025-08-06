@@ -1,0 +1,30 @@
+services:
+  # Backend service - Python avatar service
+  - type: web
+    name: chatbot-avatar-backend
+    env: docker
+    dockerfilePath: ./Dockerfile.backend
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: HEDRA_API_KEY
+        sync: false
+      - key: LIVEKIT_URL
+        sync: false
+      - key: LIVEKIT_API_KEY
+        sync: false
+      - key: LIVEKIT_API_SECRET
+        sync: false
+
+  # Frontend service - Next.js application
+  - type: web
+    name: chatbot-avatar-frontend
+    env: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    plan: starter
+    envVars:
+      - key: NEXT_PUBLIC_BACKEND_URL
+        value: https://chatbot-avatar-backend.onrender.com
