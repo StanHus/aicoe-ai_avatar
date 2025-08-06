@@ -1,11 +1,10 @@
 services:
   # Backend service - Python avatar service
-  - type: web
+  - type: worker
     name: chatbot-avatar-backend
     env: docker
     dockerfilePath: ./Dockerfile.backend
     plan: starter
-    healthCheckPath: /health
     envVars:
       - key: OPENAI_API_KEY
         sync: false
@@ -26,5 +25,11 @@ services:
     dockerContext: ./frontend
     plan: starter
     envVars:
+      - key: LIVEKIT_URL
+        sync: false
+      - key: LIVEKIT_API_KEY
+        sync: false
+      - key: LIVEKIT_API_SECRET
+        sync: false
       - key: NEXT_PUBLIC_BACKEND_URL
         value: https://chatbot-avatar-backend.onrender.com
