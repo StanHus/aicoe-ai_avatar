@@ -52,8 +52,18 @@ export default function Page() {
   return (
     // anchor
     <main data-lk-theme="default" className="h-full grid content-center bg-[var(--lk-bg)]">
-      <div className="w-full flex justify-center mb-8">
-        <img src="assets/hedra_logo.svg" alt="Hedra Logo" className="h-16 w-auto" />
+      <div className="w-full flex flex-col items-center mb-8">
+        <img src="assets/hedra_logo.svg" alt="Hedra Logo" className="h-16 w-auto mb-4" />
+        <div className="text-center text-sm text-gray-400 max-w-md">
+          <p className="mb-1">
+            💡 <strong>Voice Commands:</strong>
+          </p>
+          <p>
+            Say <span className="bg-gray-800 px-2 py-1 rounded text-xs">"stop talking"</span> to
+            pause • Say <span className="bg-gray-800 px-2 py-1 rounded text-xs">"wake up"</span> to
+            start the avatar back up{" "}
+          </p>
+        </div>
       </div>
       <RoomContext.Provider value={room}>
         <div className="lk-room-container max-w-[1024px] w-[90vw] mx-auto max-h-[90vh]">
